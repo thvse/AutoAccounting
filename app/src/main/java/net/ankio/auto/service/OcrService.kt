@@ -253,10 +253,7 @@ class OcrService : ICoreService() {
                 ocrView.dismiss()
             } finally {
                 ocrDoing = false
-                // 常驻后台关闭时，OCR 结束后停止无障碍服务
-                if (!PrefManager.ocrAccessibilityKeepAlive) {
-                    SelectToSpeakService.instance?.disableSelf()
-                }
+                // 常驻后台运行：不再主动杀死无障碍服务，防止用户需要反复去系统设置开启
             }
         }
 
