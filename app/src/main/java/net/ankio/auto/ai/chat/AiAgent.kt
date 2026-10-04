@@ -36,7 +36,7 @@ object AiAgent {
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    private val defaultSyncTypes = listOf(
+    private val defaultSyncTypes = arrayListOf(
         BillState.Synced.name,
         BillState.Edited.name,
         BillState.Wait2Edit.name
