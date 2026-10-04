@@ -11,5 +11,7 @@ data class ChatMessage(
     var content: String,
     val time: Long = System.currentTimeMillis(),
     var isExecutingTool: Boolean = false,
-    var toolStatus: String? = null
+    var toolStatus: String? = null,
+    var imageUri: String? = null,
+    var imageBase64: String? = null
 )

@@ -28,6 +28,22 @@ class AiChatAdapter(
                 layoutUser.visibility = View.VISIBLE
                 layoutAi.visibility = View.GONE
                 tvUserContent.text = msg.content
+                if (!msg.imageUri.isNullOrBlank()) {
+                    ivUserImage.visibility = View.VISIBLE
+                    runCatching {
+                        ivUserImage.setImageURI(android.net.Uri.parse(msg.imageUri))
+                    }
+                } else if (!msg.imageBase64.isNullOrBlank()) {
+                    ivUserImage.visibility = View.VISIBLE
+                    runCatching {
+                        val pureBase64 = msg.imageBase64!!.substringAfter("base64,")
+                        val bytes = android.util.Base64.decode(pureBase64, android.util.Base64.DEFAULT)
+                        val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                        ivUserImage.setImageBitmap(bitmap)
+                    }
+                } else {
+                    ivUserImage.visibility = View.GONE
+                }
             } else {
                 layoutUser.visibility = View.GONE
                 layoutAi.visibility = View.VISIBLE

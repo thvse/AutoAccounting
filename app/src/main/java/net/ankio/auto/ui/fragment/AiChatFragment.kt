@@ -80,10 +80,59 @@ class AiChatFragment : BaseFragment<FragmentAiChatBinding>() {
         }
     }
 
+    private var selectedImageUri: android.net.Uri? = null
+    private var selectedImageBase64: String? = null
+
+    private val pickImageLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.GetContent()) { uri: android.net.Uri? ->
+        if (uri != null) {
+            handleImagePicked(uri)
+        }
+    }
+
+    private fun handleImagePicked(uri: android.net.Uri) {
+        selectedImageUri = uri
+        binding.ivSelectedPreview.setImageURI(uri)
+        binding.layoutImagePreview.visibility = View.VISIBLE
+        launch {
+            selectedImageBase64 = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                runCatching {
+                    val inputStream = requireContext().contentResolver.openInputStream(uri)
+                    val original = android.graphics.BitmapFactory.decodeStream(inputStream)
+                    inputStream?.close()
+                    if (original == null) return@runCatching null
+                    val maxEdge = 1024
+                    val scaled = if (original.width > maxEdge || original.height > maxEdge) {
+                        val ratio = minOf(maxEdge.toFloat() / original.width, maxEdge.toFloat() / original.height)
+                        android.graphics.Bitmap.createScaledBitmap(original, (original.width * ratio).toInt(), (original.height * ratio).toInt(), true)
+                    } else original
+                    val baos = java.io.ByteArrayOutputStream()
+                    scaled.compress(android.graphics.Bitmap.CompressFormat.JPEG, 85, baos)
+                    val bytes = baos.toByteArray()
+                    "data:image/jpeg;base64," + android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
+                }.getOrNull()
+            }
+        }
+    }
+
+    private fun clearSelectedImage() {
+        selectedImageUri = null
+        selectedImageBase64 = null
+        binding.layoutImagePreview.visibility = View.GONE
+        binding.ivSelectedPreview.setImageDrawable(null)
+    }
+
     private fun setupInputAndChips() {
+        binding.btnAttachImage.setOnClickListener {
+            pickImageLauncher.launch("image/*")
+        }
+
+        binding.btnRemoveImage.setOnClickListener {
+            clearSelectedImage()
+        }
+
         binding.btnSend.setOnClickListener {
             val text = binding.etInput.text?.toString()?.trim().orEmpty()
-            if (text.isNotBlank()) {
+            if (text.isNotBlank() || selectedImageBase64 != null) {
                 sendMessage(text)
             }
         }
@@ -110,8 +159,22 @@ class AiChatFragment : BaseFragment<FragmentAiChatBinding>() {
             return
         }
 
+        val prompt = if (userText.isBlank() && selectedImageBase64 != null) {
+            "请识别这张发票/小票/截图，提取金额、商户和分类明细并自动录入账单"
+        } else {
+            userText
+        }
+        val currentImageUri = selectedImageUri
+        val currentImageBase64 = selectedImageBase64
+        clearSelectedImage()
+
         binding.etInput.setText("")
-        val userMsg = ChatMessage(role = "user", content = userText)
+        val userMsg = ChatMessage(
+            role = "user",
+            content = prompt,
+            imageUri = currentImageUri?.toString(),
+            imageBase64 = currentImageBase64
+        )
         chatAdapter.addMessage(userMsg)
         binding.recyclerViewChat.smoothScrollToPosition(chatAdapter.itemCount - 1)
 

@@ -23,15 +23,30 @@
             app:cardBackgroundColor="?attr/colorPrimaryContainer"
             app:strokeWidth="0dp">
 
-            <TextView
-                android:id="@+id/tvUserContent"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="14dp"
-                android:paddingVertical="10dp"
-                android:textColor="?attr/colorOnPrimaryContainer"
-                android:textSize="15sp"
-                android:textIsSelectable="true" />
+                android:orientation="vertical">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivUserImage"
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    android:scaleType="centerCrop"
+                    android:layout_margin="4dp"
+                    android:visibility="gone"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" />
+
+                <TextView
+                    android:id="@+id/tvUserContent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="10dp"
+                    android:textColor="?attr/colorOnPrimaryContainer"
+                    android:textSize="15sp"
+                    android:textIsSelectable="true" />
+            </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 

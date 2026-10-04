@@ -155,6 +155,54 @@ object AiAgent {
         }
         tools.add(statsTool)
 
+        // 4. 录入账单
+        val recordFunc = JsonObject().apply {
+            addProperty("name", "record_bill")
+            addProperty("description", "录入一笔新的流水账单到本地记账数据库（当用户上传发票、小票图片或要求记账时调用此工具保存）")
+            val params = JsonObject().apply {
+                addProperty("type", "object")
+                val props = JsonObject().apply {
+                    val amount = JsonObject().apply {
+                        addProperty("type", "number")
+                        addProperty("description", "账单金额（元），正数，如 38.5")
+                    }
+                    val type = JsonObject().apply {
+                        addProperty("type", "string")
+                        addProperty("description", "账单类型：'支出' 或 '收入'，默认为'支出'")
+                    }
+                    val category = JsonObject().apply {
+                        addProperty("type", "string")
+                        addProperty("description", "账单分类，如'餐饮'、'日用'、'交通'、'购物'、'娱乐'、'医疗'、'数码'等")
+                    }
+                    val shopName = JsonObject().apply {
+                        addProperty("type", "string")
+                        addProperty("description", "商户名称或交易对方，如'肯德基'、'永辉超市'、'滴滴出行'")
+                    }
+                    val remark = JsonObject().apply {
+                        addProperty("type", "string")
+                        addProperty("description", "消费明细或备注说明")
+                    }
+                    add("amount", amount)
+                    add("type", type)
+                    add("category", category)
+                    add("shopName", shopName)
+                    add("remark", remark)
+                }
+                add("properties", props)
+                val required = JsonArray().apply {
+                    add("amount")
+                    add("category")
+                }
+                add("required", required)
+            }
+            add("parameters", params)
+        }
+        val recordTool = JsonObject().apply {
+            addProperty("type", "function")
+            add("function", recordFunc)
+        }
+        tools.add(recordTool)
+
         return tools
     }
 
@@ -272,6 +320,35 @@ object AiAgent {
                     }.toString()
                 }
 
+                "record_bill" -> {
+                    val amount = if (args.has("amount") && !args.get("amount").isJsonNull) args.get("amount").asDouble else 0.0
+                    val typeStr = if (args.has("type") && !args.get("type").isJsonNull) args.get("type").asString else "支出"
+                    val category = if (args.has("category") && !args.get("category").isJsonNull) args.get("category").asString else "其它"
+                    val shopName = if (args.has("shopName") && !args.get("shopName").isJsonNull) args.get("shopName").asString else ""
+                    val remark = if (args.has("remark") && !args.get("remark").isJsonNull) args.get("remark").asString else ""
+
+                    val bill = BillInfoModel().apply {
+                        this.type = if (typeStr == "收入") BillType.Income else BillType.Expend
+                        this.money = amount
+                        this.shopName = shopName
+                        this.cateName = category
+                        this.remark = remark
+                        this.time = System.currentTimeMillis()
+                        this.state = BillState.Synced
+                        this.currency = "CNY"
+                        this.channel = "AI智能录单"
+                    }
+                    BillAPI.put(bill)
+                    JsonObject().apply {
+                        addProperty("success", true)
+                        addProperty("amount", amount)
+                        addProperty("type", typeStr)
+                        addProperty("category", category)
+                        addProperty("shopName", shopName)
+                        addProperty("message", "已成功为你录入账单：$shopName $amount 元（分类：$category）")
+                    }.toString()
+                }
+
                 else -> "{\"error\": \"未知工具: $name\"}"
             }
         } catch (e: Exception) {
@@ -310,17 +387,37 @@ object AiAgent {
 1. query_bills: 查询用户的流水账单（支持商户名、日期、关键字筛选）。
 2. update_bill_category: 修改某笔账单的分类类目。当用户要求修改某笔消费的类目时，如果不知道ID，先调用 query_bills 搜索定位，再调用 update_bill_category 执行修改。
 3. analyze_spending: 获取某年某月的财务汇总统计（总支出、总收入、分类占比）。
+4. record_bill: 录入新账单。当用户上传发票、小票图片或要求记账时，根据识别到的金额、商户名、分类、商品备注调用此工具直接存入数据库！
 
 回答风格：亲切、专业、简明扼要，多用 Emoji，帮用户清晰管理个人财务。"""
                 )
             }
             messagesArray.add(systemMsg)
 
-            // 历史消息
+            // 历史消息（支持图文多模态）
             messagesHistory.forEach { msg ->
                 val m = JsonObject().apply {
                     addProperty("role", msg.role)
-                    addProperty("content", msg.content)
+                    if (!msg.imageBase64.isNullOrBlank()) {
+                        val contentArray = JsonArray().apply {
+                            val textObj = JsonObject().apply {
+                                addProperty("type", "text")
+                                addProperty("text", msg.content.ifBlank { "请识别这张发票/小票/截图，提取金额、商户和明细并录入账单" })
+                            }
+                            add(textObj)
+                            val imgObj = JsonObject().apply {
+                                addProperty("type", "image_url")
+                                val urlObj = JsonObject().apply {
+                                    addProperty("url", msg.imageBase64)
+                                }
+                                add("image_url", urlObj)
+                            }
+                            add(imgObj)
+                        }
+                        add("content", contentArray)
+                    } else {
+                        addProperty("content", msg.content)
+                    }
                 }
                 messagesArray.add(m)
             }
