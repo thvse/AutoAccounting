@@ -38,11 +38,7 @@ jobs:
       - name: Prepare APK for Release
         run: |
           mkdir -p output-apk
-          if ls app/build/outputs/apk/release/*.apk 1> /dev/null 2>&1; then
-            cp $(ls app/build/outputs/apk/release/*.apk | head -n 1) output-apk/AutoAccounting-AI.apk
-          else
-            cp $(find app/build/outputs/apk/ -name "*.apk" | head -n 1) output-apk/AutoAccounting-AI.apk
-          fi
+          find app/build/outputs/ -type f -name "*.apk" -exec cp -v "{}" output-apk/AutoAccounting-AI.apk \;
           ls -lh output-apk/
 
       - name: Upload APK Artifact
