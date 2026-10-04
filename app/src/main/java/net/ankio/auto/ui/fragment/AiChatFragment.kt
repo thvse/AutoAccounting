@@ -70,9 +70,9 @@ class AiChatFragment : BaseFragment<FragmentAiChatBinding>() {
             binding.cardKeyWarning.visibility = View.VISIBLE
             binding.cardKeyWarning.setOnClickListener {
                 runCatching {
-                    findNavController().navigate(R.id.aiConfigFragment)
+                    findNavController().navigate(R.id.action_aiChatFragment_to_aiConfigFragment)
                 }.onFailure {
-                    ToastUtils.info(requireContext(), "请前往 设置 -> AI 助理 设置您的 API Key")
+                    ToastUtils.info("请前往 设置 -> AI 助理 设置您的 API Key")
                 }
             }
         } else {
@@ -105,7 +105,7 @@ class AiChatFragment : BaseFragment<FragmentAiChatBinding>() {
         if (isSending) return
         val apiKey = PrefManager.apiKey.trim()
         if (apiKey.isBlank()) {
-            ToastUtils.info(requireContext(), "请先配置 API Key")
+            ToastUtils.info("请先配置 API Key")
             checkApiKeyStatus()
             return
         }

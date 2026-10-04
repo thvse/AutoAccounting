@@ -208,7 +208,7 @@ object AiAgent {
 
                     if (targetBill != null) {
                         targetBill.cateName = newCategory
-                        targetBill.state = BillState.Edited.name
+                        targetBill.state = BillState.Edited
                         BillAPI.put(targetBill)
                         JsonObject().apply {
                             addProperty("success", true)
