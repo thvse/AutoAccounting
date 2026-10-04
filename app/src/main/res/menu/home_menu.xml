@@ -6,11 +6,15 @@
         android:iconTint="?colorOnPrimary"
         android:title="@string/title_home" />
     <item
+        android:id="@+id/title_ai_chat"
+        android:icon="@drawable/ic_ai"
+        android:showAsAction="always"
+        android:iconTint="?colorOnPrimary"
+        android:title="AI 助理" />
+    <item
         android:id="@+id/title_log"
         android:icon="@drawable/menu_item_log"
         android:showAsAction="ifRoom"
         android:iconTint="?colorOnPrimary"
         android:title="@string/title_log" />
-
-
 </menu>

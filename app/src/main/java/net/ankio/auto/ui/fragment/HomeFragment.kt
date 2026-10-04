@@ -70,12 +70,15 @@ class HomeFragment : BaseFragment<FragmentPluginHomeBinding>() {
         }
         binding.toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
+                R.id.title_ai_chat -> {
+                    findNavController().navigate(R.id.aiChatFragment)
+                    true
+                }
                 R.id.title_log -> {
                     // 使用目的地 ID 导航
                     findNavController().navigate(R.id.logFragment)
                     true
                 }
-
 
                 R.id.title_explore -> {
                     PrefManager.introIndex = 0

@@ -60,6 +60,9 @@
         <action
             android:id="@+id/action_homeFragment_to_aiSummaryFragment"
             app:destination="@id/aiSummaryFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_aiChatFragment"
+            app:destination="@id/aiChatFragment" />
         <!-- <action
              android:id="@+id/action_homeFragment_to_categoryRuleFragment"
              app:destination="@id/categoryRuleFragment" />
@@ -416,6 +419,14 @@
         tools:layout="@layout/fragment_notice">
 
     </fragment>
-    -->
+    <fragment
+        android:id="@+id/aiChatFragment"
+        android:name="net.ankio.auto.ui.fragment.AiChatFragment"
+        android:label="AI 财务助手"
+        tools:layout="@layout/fragment_ai_chat">
+        <action
+            android:id="@+id/action_aiChatFragment_to_aiConfigFragment"
+            app:destination="@id/aiConfigFragment" />
+    </fragment>
 
 </navigation>
