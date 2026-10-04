@@ -69,21 +69,21 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipAnalyzeMonth"
-                style="@style/Widget.Material3.Chip.Suggestion"
+                style="@style/Widget.Material3.Chip.Assist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="📊 分析本月消费结构" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipQueryRecent"
-                style="@style/Widget.Material3.Chip.Suggestion"
+                style="@style/Widget.Material3.Chip.Assist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🔍 查看最近消费账单" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipFixCategory"
-                style="@style/Widget.Material3.Chip.Suggestion"
+                style="@style/Widget.Material3.Chip.Assist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🏷️ 把最近一笔外卖改为餐饮" />
@@ -134,7 +134,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSend"
-            style="@style/Widget.Material3.Button.IconButton.Filled"
+            style="?attr/materialIconButtonFilledStyle"
             android:layout_width="44dp"
             android:layout_height="44dp"
             android:layout_marginStart="8dp"

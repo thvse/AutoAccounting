@@ -27,7 +27,13 @@ jobs:
 
       - name: Build APK
         run: |
-          ./gradlew assembleRelease -x lint -x test --no-daemon --stacktrace || ./gradlew assembleDebug -x lint -x test --no-daemon --stacktrace
+          ./gradlew :app:assembleRelease -x lint -x test --no-daemon --stacktrace 2>&1 | tee build.log
+
+      - name: Print failure log
+        if: failure()
+        run: |
+          echo "=== BUILD LOG FAILURE TAIL ==="
+          tail -n 250 build.log
 
       - name: Prepare APK for Release
         run: |
